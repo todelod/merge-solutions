@@ -20,6 +20,7 @@ namespace SolutionMerger
             */
             
             var nonstop = false;
+            var keepSlnOrder = false;
             var outputSlnPath = "merged.sln";
             var fixDupeGuids = false;
             var solutionNames = new List<string>();
@@ -34,6 +35,9 @@ namespace SolutionMerger
                         break;
                     case "/nonstop":
                         nonstop = true;
+                        break;
+                    case "/order":
+                        keepSlnOrder = true;
                         break;
                     case "/out":
                         outputSlnPath = args[i + 1];
@@ -75,8 +79,19 @@ namespace SolutionMerger
             if(fixDupeGuids)
                 ProjectReferenceFixer.FixAllSolutions(solutionNames.Select(SolutionInfo.Parse).ToArray(), out errors);
 
+            var solutions = solutionNames.Select(SolutionInfo.Parse).ToArray();
+            if ( keepSlnOrder )
+            {
+                var prefix = 1;
+                foreach (var sln in solutions)
+                {
+                    sln.Name = prefix.ToString() + " " + sln.Name;
+                    prefix++;
+                }
+            }
+
             outputSlnPath = Path.GetFullPath(outputSlnPath);
-            var aggregateSolution = SolutionInfo.MergeSolutions(Path.GetFileNameWithoutExtension(outputSlnPath), Path.GetDirectoryName(outputSlnPath), out warnings, solutionNames.Select(SolutionInfo.Parse).ToArray());
+            var aggregateSolution = SolutionInfo.MergeSolutions(Path.GetFileNameWithoutExtension(outputSlnPath), Path.GetDirectoryName(outputSlnPath), out warnings, solutions);
             aggregateSolution.Save();
 
             Console.WriteLine("Merged solution: {0}", outputSlnPath);

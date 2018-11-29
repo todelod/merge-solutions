@@ -8,7 +8,7 @@ namespace SolutionMerger.Parsers
 {
     public class SolutionInfo
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
         public string BaseDir { get; private set; }
         public string Text { get; private set; }
 
